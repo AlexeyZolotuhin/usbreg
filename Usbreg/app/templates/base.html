@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.css') }}">
+    <title >
+        {% if title %}
+          {{ title }}
+          {% else %}
+          Добро пожаловать на USB-reg
+        {% endif %}
+    </title>
+</head>
+<body>
+
+    <header class="p-3 bg-dark text-white">
+        <div class="container">
+          <div class="d-flex flex-wrap align-items-center justify-content-center justify-content-lg-start">
+
+            <a href="/" class="d-flex align-items-center mb-2 mb-lg-0 text-white text-decoration-none">
+              <svg class="bi me-2" width="50" height="42" role="img" aria-label="Bootstrap">
+                  <image href="/static/images/banner20.png" height="42" width="50" />
+              </svg>
+            </a>
+
+            <div class="nav col-12 col-lg-auto me-lg-auto mb-2 justify-content-center mb-md-0">
+                {% if title %}
+                    {{ title }}
+                {% else %}
+                    Добро пожаловать на USB-reg
+                {% endif %}
+            </div>
+
+            <div class="text-end">
+              <!--<button type="button" class="btn btn-outline-light me-2">Login</button>-->
+              {% if current_user.is_anonymous %}
+                <a class="btn btn-outline-light me-2" href="{{ url_for('login') }}">Login</a>
+              {% else %}
+                <a class="btn btn-warning" href="{{ url_for('logout') }}">Logout</a>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+      </header>
+
+    <main>
+        <div class="container ">
+            <div class="hstack">
+                <div class="col-lg-2">
+                    <div class="flex-shrink-0 p-3 bg-white sticky-top" style="width: 180px;">
+                        <span class="fs-5">USB-устройства</span>
+                        <hr>
+                              <ul class="nav nav-pills flex-column mb-auto">
+                                <li><a href="{{ url_for('index') }}" class="link-dark">Список устройств</a></li>
+                                <li><a href="#" class="link-dark">Добавить USB</a></li>
+                                <li><a href="#" class="link-dark">Выгрузка в файл</a></li>
+                                <li><a href="#" class="link-dark">Загрузка из файла</a></li>
+                              </ul>
+                        <hr>
+                        <span class="fs-5">Компьютеры</span>
+                        <hr>
+                              <ul class="nav nav-pills flex-column mb-auto">
+                                <li><a href="#" class="link-dark">Список ПК</a></li>
+                                <li><a href="#" class="link-dark">Добавить ПК</a></li>
+                                <li><a href="#" class="link-dark">Выгрузка в файл</a></li>
+                                <li><a href="#" class="link-dark">Загрузка из файла</a></li>
+                              </ul>
+                        <hr>
+                        <span class="fs-5">Документы</span>
+                        <hr>
+                              <ul class="nav nav-pills flex-column mb-auto">
+                                <li><a href="#" class="link-dark">С.з. USB</a></li>
+                                <li><a href="#" class="link-dark">С.з. ПК</a></li>
+                                <li><a href="#" class="link-dark">Администр. ИКС</a></li>
+                                <li><a href="#" class="link-dark">Добавить документ</a></li>
+                              </ul>
+                        <hr>
+
+                        <ul class="list-inline ps-1">
+                          <li>
+                            <a href="{{ url_for('register') }}" class="btn btn-toggle d-inline-flex align-items-center rounded border-0">
+                              Add user
+                            </a>
+                          </li>
+                          <li>
+                            <a href="/about" class="btn btn-toggle d-inline-flex align-items-center rounded border-0">
+                              List users
+                            </a>
+                          </li>
+                          <li>
+                            <a href="#" class="btn btn-toggle d-inline-flex align-items-center rounded border-0">
+                              Wiki
+                            </a>
+                          </li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="col-lg-10">
+                    {% block body %}{% endblock %}
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="container td-flex flex-wrap justify-content-between align-items-center py-3 my-4 border-top">
+        <div class="col-md-4 d-flex align-items-center">
+          <span class="text-muted">© 2022 АО "ПО "Стрела"</span>
+        </div>
+    </footer>
+
+</body>
+</html>

@@ -1,0 +1,88 @@
+{% extends 'base.html' %}
+
+{% block pagename %}
+    {{ title }}
+{% endblock %}
+
+{% block body %}
+<div class="container">
+    <div class="hstack mt-3">
+        <div class="col-lg-9">
+            <h1>Hi, {{ current_user.username }}!</h1>
+            <p>Количество записей: {{ devices|length }}</p>
+            {% if devices|length > 0 %}
+                {% for el in devices %}
+                    {% if el.status == "Активная" %}
+                        <div class="alert alert-info ">
+                    {% elif el.status == "Вышла из строя" %}
+                        <div class="alert alert-danger">
+                    {% elif el.status == "Сдана" %}
+                        <div class="alert alert-warning">
+                    {% endif %}
+                        <h4>Имя устройсва: {{ el.dev_numb }}</h4>
+                        <p>
+                            Подразделение: {{ el.department.departmentname }}<br>
+                            Ответственный: {{ el.owner }}<br>
+                            Идентификатор устройства: {{ el.dev_id }}<br>
+                            Номер служебной записки: {{ el.doc_numb }}<br>
+                            Статус: {{ el.status }}<br>
+                        </p>
+                            <p>Дата записи: {{ el.rec_date }}</p>
+                            <a href="/devices/{{ el.id }}/detail" class="btn btn-warning">Детальнее</a>
+                            <a href="/devices/{{ el.id }}/edit_dev" class="btn btn-success">Изменить</a>
+                         </div>
+                {% endfor %}
+            {% else %}
+                <p>Нет совпадений для указанных параметров, либо база пуста</p>
+            {% endif %}
+        </div>
+        <div class="col-lg-3 m-3">
+            <div class="d-flex flex-column flex-shrink-0 p-3 text-dark bg-light sticky-top" style="width: 280px;">
+
+                    <form method="post">
+                        <span class="fs-4">Фильтровать</span>
+                          <div class="m-2">
+                            <input type="text" name="dev_numb" id="dev_numb" class="form-control" placeholder="По номеру устройства"><br>
+                            <select name="department_name" class="form-control" >
+                                <option selected="selected" disabled value="None"> По подразделению </option>
+                                {% if departments|length > 0 %}
+                                    {% for dep in departments %}
+                                        <option value="{{ dep.id }}">{{ dep.name }}</option>
+                                    {% endfor %}
+                                {% else %}
+                                    <option disabled value="None">Список пуст</option>
+                                {% endif %}
+                            </select> <br>
+                            <input type="text" name="dev_id" id="dev_id" class="form-control" placeholder="По идентификатору"><br>
+                            <input type="text" name="doc_numb" id="doc_numb" class="form-control" placeholder="По с.з."><br>
+                            <select name="status" id="status" class="form-control" >
+                                <option selected="selected" disabled value="None">По статусу</option>
+                                <option value="Активная">Активная</option>
+                                <option value="Сдана">Сдана</option>
+                                <option value="Вышла из строя">Вышла из строя</option>
+                            </select> <br>
+                            <input type="text" name="owner" id="owner" class="form-control" placeholder="По ответственному">
+                          </div>
+                        <hr>
+                        <span class="fs-4">Сортировать</span> <br>
+                          <div class="m-2">
+                            <input type="radio" id="sortdate"
+                             name="sort" value="rec_date" checked>
+                            <label for="sortdate">По дате</label> <br>
+
+                            <input type="radio" id="sortdep"
+                             name="sort" value="department_name">
+                            <label for="sortdep">По подразделению</label> <br>
+
+                            <input type="radio" id="sortdevnumb"
+                             name="sort" value="dev_numb">
+                            <label for="sortdevnumb">По номеру устройства</label>
+                          </div>
+                        <hr>
+                        <input type="submit" class="btn btn-success" value="Применить">
+                    </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
