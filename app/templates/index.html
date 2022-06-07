@@ -8,7 +8,6 @@
 <div class="container">
     <div class="hstack mt-3">
         <div class="col-lg-9">
-            <h1>Hi, {{ current_user.username }}!</h1>
             <p>Количество записей: {{ devices|length }}</p>
             {% if devices|length > 0 %}
                 {% for el in devices %}
@@ -19,9 +18,9 @@
                     {% elif el.status == "Сдана" %}
                         <div class="alert alert-warning">
                     {% endif %}
-                        <h4>Имя устройсва: {{ el.dev_numb }}</h4>
+                        <h4>Имя устройства: {{ el.dev_numb }}</h4>
                         <p>
-                            Подразделение: {{ el.department.departmentname }}<br>
+                            Подразделение: {{ el.department.name }}<br>
                             Ответственный: {{ el.owner }}<br>
                             Идентификатор устройства: {{ el.dev_id }}<br>
                             Номер служебной записки: {{ el.doc_numb }}<br>
@@ -39,47 +38,31 @@
         <div class="col-lg-3 m-3">
             <div class="d-flex flex-column flex-shrink-0 p-3 text-dark bg-light sticky-top" style="width: 280px;">
 
-                    <form method="post">
+                    <form method="post" action="">
+                        {{ form.hidden_tag() }}
                         <span class="fs-4">Фильтровать</span>
                           <div class="m-2">
-                            <input type="text" name="dev_numb" id="dev_numb" class="form-control" placeholder="По номеру устройства"><br>
-                            <select name="department_name" class="form-control" >
-                                <option selected="selected" disabled value="None"> По подразделению </option>
-                                {% if departments|length > 0 %}
-                                    {% for dep in departments %}
-                                        <option value="{{ dep.id }}">{{ dep.name }}</option>
-                                    {% endfor %}
-                                {% else %}
-                                    <option disabled value="None">Список пуст</option>
-                                {% endif %}
-                            </select> <br>
-                            <input type="text" name="dev_id" id="dev_id" class="form-control" placeholder="По идентификатору"><br>
-                            <input type="text" name="doc_numb" id="doc_numb" class="form-control" placeholder="По с.з."><br>
-                            <select name="status" id="status" class="form-control" >
-                                <option selected="selected" disabled value="None">По статусу</option>
-                                <option value="Активная">Активная</option>
-                                <option value="Сдана">Сдана</option>
-                                <option value="Вышла из строя">Вышла из строя</option>
-                            </select> <br>
-                            <input type="text" name="owner" id="owner" class="form-control" placeholder="По ответственному">
+                            {{ form.dev_numb(class="form-control", placeholder='По имени устройства') }}<br>
+                            {{ form.department(class="form-select") }}<br>
+                            {{ form.dev_id(class="form-control", placeholder='По идентификатору') }}<br>
+                            {{ form.doc_numb(class="form-control", placeholder='По с.з.') }}<br>
+                            {{ form.status(class="form-select") }}<br>
+                            {{ form.owner(class="form-control", placeholder='По ответственному') }}<br>
                           </div>
                         <hr>
                         <span class="fs-4">Сортировать</span> <br>
-                          <div class="m-2">
-                            <input type="radio" id="sortdate"
-                             name="sort" value="rec_date" checked>
-                            <label for="sortdate">По дате</label> <br>
-
-                            <input type="radio" id="sortdep"
-                             name="sort" value="department_name">
-                            <label for="sortdep">По подразделению</label> <br>
-
-                            <input type="radio" id="sortdevnumb"
-                             name="sort" value="dev_numb">
-                            <label for="sortdevnumb">По номеру устройства</label>
-                          </div>
+                            <div class="m-2">
+                                {{ form.sortradio() }}
+                            </div>
                         <hr>
-                        <input type="submit" class="btn btn-success" value="Применить">
+                        <div class="hstack m-2">
+                            <div class="col-lg-6 ">
+                                {{ form.submit_apply(class="btn btn-success") }}
+                            </div>
+                            <div class="col-lg-6">
+                                {{ form.submit_clear(class="btn btn-warning") }}
+                            </div>
+                        </div>
                     </form>
             </div>
         </div>

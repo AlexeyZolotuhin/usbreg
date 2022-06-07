@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+
+{% block title %}
+Загрузка данных из файла
+{% endblock %}
+
+{% block pagename %}
+Загрузка данных из файла *.xls
+{% endblock %}
+
+{% block body %}
+<div class="container">
+    <form class="mt-5" method="post">
+        <label for="path_from">Укажите путь к файлу: </label>
+        {% if wrong_path == False %}
+            <input type="text" name="path_from" id="path_from" class="form-control" placeholder="Пример: C:\Users\alzo\Desktop\usbWeb\usb_flash_register.xlsx"><br>
+        {% else %}
+            <input type="text" name="path_from" id="path_from" class="form-control-err" placeholder="Пример: C:\Users\alzo\Desktop\usbWeb\usb_flash_register.xlsx">
+            <p>Поле не может быть пустым!</p>
+        {% endif %}
+        <input type="submit" class="btn btn-success" value="Загрузить данные">
+    </form>
+</div>
+{% endblock %}

@@ -2,50 +2,46 @@
 from flask import render_template, flash, redirect, url_for, request
 from werkzeug.urls import url_parse
 from app import app, db
-from app.forms import LoginForm, RegistrationForm
+from app.forms import LoginForm, RegistrationForm, FilterForm
 from flask_login import current_user, login_user, logout_user, login_required
 from app.models import User, Devinfo, Department
+import openpyxl
+from datetime import datetime
+from app.usbparam import status_types
 
-status_types = {'Active': 'Активная', 'Return': 'Сдана', 'Broken': 'Вышла из строя'}
 
-@app.route('/')
-@app.route('/index')
+
+@app.route('/', methods=['GET', 'POST'])
+@app.route('/index', methods=['GET', 'POST'])
 @login_required
 def index():
-    user = {'username': 'Эльдар Рязанов'}
-    devices = [
-        {
-            'dev_numb': '195-10',
-            'dev_id': 'USBSTOR\DISK&VEN_SANDISK&PROD_CRUZER_BLADE&REV_2.01\4C532000010607105025&0',
-            'department': {'departmentname': 'Отдел 195'},
-            'dev_type': 'USBflash',
-            'owner': 'Иванов В. В.',
-            'doc_numb': 'с.з. 195/10 от 15.03.2022',
-            'status': status_types['Active'],
-            'rec_date': '05.06.2022 19:15'
-        },
-        {
-            'dev_numb': '23-1',
-            'dev_id': 'USBSTOR\DISK&VEN_SANDISK&PROD_KINGSTONE_BLADE&REV_2.01\4646800005025&0',
-            'department': {'departmentname': 'Цех 23'},
-            'dev_type': 'USBflash',
-            'owner': 'Сидоров М. В.',
-            'doc_numb': 'с.з. 23/40 от 11.04.2021',
-            'status': status_types['Broken'],
-            'rec_date': '11.05.2021 19:15'
-        },
-        {
-            'dev_numb': '119-8',
-            'dev_id': 'USBSTOR\DISK&VEN_SANDISK&PROD_CHINE_BLADE&REV_2.01\5667657656553025&0',
-            'department': {'departmentname': 'Отдел 119'},
-            'dev_type': 'USBflash',
-            'owner': 'Кукикова Е. В.',
-            'doc_numb': 'с.з. 119/04 от 10.05.2022',
-            'status': status_types['Return'],
-            'rec_date': '10.06.2022 18:10'
-        }
-    ]
-    return render_template('index.html', title='Список зарегистрированных USB-устройств', devices=devices)
+    filterform = FilterForm()
+    filterform.department.choices = filterform.department.choices + [(dep.id, dep.name) for dep in Department.query.order_by('name').all()]
+    devices = Devinfo.query.filter_by(last_state=True).order_by(Devinfo.rec_date.desc()).all()
+    sort = ""
+    if filterform.validate_on_submit():
+        if filterform.submit_apply.data:
+            if filterform.dev_numb.data != "":
+                devices = [dev for dev in devices if filterform.dev_numb.data in dev.dev_numb]
+            if filterform.dev_id.data != "":
+                devices = [dev for dev in devices if filterform.dev_id.data in dev.dev_id]
+            if filterform.department.data != "None":
+                devices = [dev for dev in devices if dev.department_id == int(filterform.department.data)]
+            if filterform.doc_numb.data != "":
+                devices = [dev for dev in devices if filterform.doc_numb.data in dev.doc_numb]
+            if filterform.status.data != "None":
+                devices = [dev for dev in devices if dev.status == filterform.status.data]
+            if filterform.owner.data != "":
+                devices = [dev for dev in devices if filterform.owner.data in dev.owner]
+            elif filterform.sortradio.data == "dev_numb":
+                devices = sorted(devices, key=lambda dev: dev.dev_numb)
+            elif filterform.sortradio.data == "department_name":
+                devices = sorted(devices, key=lambda dev: dev.department.name)
+        elif filterform.submit_clear.data:
+            return redirect(url_for('index'))
+
+    return render_template('index.html', title='Список зарегистрированных USB-устройств',
+                           devices=devices, form=filterform)
 
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -53,10 +49,8 @@ def login():
     if current_user.is_authenticated:
         return redirect(url_for('index'))
     form = LoginForm()
-    user = User.query.filter_by(username=form.username.data).first()
     if form.validate_on_submit():
         user = User.query.filter_by(username=form.username.data).first()
-        print(user)
         if user is None or not user.check_password(form.password.data):
             flash('Invalid username or password')
             return redirect(url_for('login'))
@@ -77,6 +71,7 @@ def logout():
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     form = RegistrationForm()
+    form.department.choices = [(dep.id, dep.name) for dep in Department.query.order_by('name').all()]
     if form.validate_on_submit():
         user = User(username=form.username.data, fullname=form.fullname.data,
                     department=get_dep(form.department.data))
@@ -86,6 +81,95 @@ def register():
         flash('Добавлен новый пользователь!')
         return redirect(url_for('index'))
     return render_template('register.html', title='Добавить пользователя', form=form)
+
+
+@app.route('/load_from_file', methods=['POST', 'GET'])
+def load_from_file():
+    if request.method == "POST":
+        # do something
+        path_from = request.form['path_from']
+        mytable = path_from.maketrans('', '', ' \n\t\r')
+        path_from = path_from.translate(mytable)
+        if path_from == "":
+            return render_template("load_from_file.html", wrong_path=True)
+
+        # Define variable to load the wookbook
+        wookbook = openpyxl.load_workbook(path_from)
+        # Define variable to read the active sheet:
+        worksheet = wookbook.active
+        for line in worksheet.iter_rows(2, worksheet.max_row):
+            department_id = get_dep(line[1].value).id
+            dev_id = line[2].value
+
+            list_owner_numb = line[3].value.split("/")
+            owner = list_owner_numb[0]
+            dev_numb = line[1].value.split('_')[1] + '-' + list_owner_numb[1]
+
+            doc_numb = line[4].value
+
+            if "_от" in line[4].value:
+                rec_date = line[4].value.split("_от")[1].replace("г.", "").replace(".", "-")
+                format = '%d-%m-%y'
+                rec_date = datetime.strptime(rec_date, format)
+            else:
+                rec_date = datetime.now()
+
+            remark = ""
+            if line[5].value != None:
+                remark = line[5].value
+
+            if "вышла из строя" in remark or "сдана" in remark:
+                # добавляем неактивную запись флешки и активную с новой датой
+                devinfo = Devinfo(dev_numb=dev_numb, dev_id=dev_id, department_id=department_id,
+                                  owner=owner, doc_numb=doc_numb, doc_ref="", rec_date=rec_date, remark=remark,
+                                  last_state=False)
+                try:
+                    db.session.add(devinfo)
+                    db.session.commit()
+                except:
+                    return "При загрузке из файла произошла ошибка. Строка в файле: " + line[0].value
+
+                if "/" in remark:
+                    remark = remark.split("/")[0]
+
+                status = ""
+                if "вышла из строя" in remark:
+                    status = "Вышла из строя"
+                elif "сдана" in remark:
+                    status = "Сдана"
+
+                rec_date = remark.split("_")[1].replace('.', '-')
+                format = '%d-%m-%Y'
+                rec_date = datetime.strptime(rec_date, format)
+
+                # print('0', line[0].value, ' 1', line[1].value, ' 2', line[2].value, ' 3', line[3].value, ' 4',
+                #      line[4].value, ' 5', line[5].value)
+                # print(line[0].value, ' ', department_id, " ", dev_id, " ", owner, ' ', dev_numb, ' ', doc_numb, ' ',
+                #      rec_date, status)
+                # print('\n')
+
+                devinfo = Devinfo(dev_numb=dev_numb, dev_id=dev_id, department_id=department_id,
+                                  owner=owner, doc_numb=doc_numb, doc_ref="", status=status, rec_date=rec_date,
+                                  remark=remark)
+                try:
+                    db.session.add(devinfo)
+                    db.session.commit()
+                except:
+                    return " 1 При загрузке из файла произошла ошибка. Строка в файле: " + line[0].value
+
+            else:
+                # добавляем только активную запись
+                devinfo = Devinfo(dev_numb=dev_numb, dev_id=dev_id, department_id=department_id,
+                                  owner=owner, doc_numb=doc_numb, doc_ref="", rec_date=rec_date, remark=remark)
+                try:
+                    db.session.add(devinfo)
+                    db.session.commit()
+                except:
+                    return "2 При загрузке из файла произошла ошибка. Строка в файле: " + str(line[0].value)
+
+        return redirect(url_for('index'))
+    else:
+        return render_template("load_from_file.html", wrong_path=False)
 
 
 def get_dep(department_name):
@@ -100,3 +184,4 @@ def get_dep(department_name):
         except:
             return None
     return department
+

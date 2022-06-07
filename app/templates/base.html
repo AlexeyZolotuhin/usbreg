@@ -35,11 +35,10 @@
             </div>
 
             <div class="text-end">
-              <!--<button type="button" class="btn btn-outline-light me-2">Login</button>-->
               {% if current_user.is_anonymous %}
                 <a class="btn btn-outline-light me-2" href="{{ url_for('login') }}">Login</a>
               {% else %}
-                <a class="btn btn-warning" href="{{ url_for('logout') }}">Logout</a>
+                <a class="btn btn-warning" href="{{ url_for('logout') }}">Выход {{ current_user.username }}</a>
               {% endif %}
             </div>
           </div>
@@ -57,7 +56,7 @@
                                 <li><a href="{{ url_for('index') }}" class="link-dark">Список устройств</a></li>
                                 <li><a href="#" class="link-dark">Добавить USB</a></li>
                                 <li><a href="#" class="link-dark">Выгрузка в файл</a></li>
-                                <li><a href="#" class="link-dark">Загрузка из файла</a></li>
+                                <li><a href="{{ url_for('load_from_file') }}" class="link-dark">Загрузка из файла</a></li>
                               </ul>
                         <hr>
                         <span class="fs-5">Компьютеры</span>
