@@ -1,24 +1,22 @@
 # -*- coding: utf-8 -*-
-from flask import render_template, flash, redirect, url_for, request
-from werkzeug.urls import url_parse
-from app import app, db
-from app.forms import LoginForm, RegistrationForm, FilterForm
-from flask_login import current_user, login_user, logout_user, login_required
+from flask import render_template, redirect, url_for, request
+from app import db
+from app.main.forms import FilterForm
+from flask_login import current_user, login_required
 from app.models import User, Devinfo, Department
 import openpyxl
 from datetime import datetime
+from app.main import bp
 from app.usbparam import status_types
 
 
-
-@app.route('/', methods=['GET', 'POST'])
-@app.route('/index', methods=['GET', 'POST'])
+@bp.route('/', methods=['GET', 'POST'])
+@bp.route('/index', methods=['GET', 'POST'])
 @login_required
 def index():
     filterform = FilterForm()
     filterform.department.choices = filterform.department.choices + [(dep.id, dep.name) for dep in Department.query.order_by('name').all()]
     devices = Devinfo.query.filter_by(last_state=True).order_by(Devinfo.rec_date.desc()).all()
-    sort = ""
     if filterform.validate_on_submit():
         if filterform.submit_apply.data:
             if filterform.dev_numb.data != "":
@@ -38,52 +36,13 @@ def index():
             elif filterform.sortradio.data == "department_name":
                 devices = sorted(devices, key=lambda dev: dev.department.name)
         elif filterform.submit_clear.data:
-            return redirect(url_for('index'))
+            return redirect(url_for('main.index'))
 
     return render_template('index.html', title='Список зарегистрированных USB-устройств',
                            devices=devices, form=filterform)
 
 
-@app.route('/login', methods=['GET', 'POST'])
-def login():
-    if current_user.is_authenticated:
-        return redirect(url_for('index'))
-    form = LoginForm()
-    if form.validate_on_submit():
-        user = User.query.filter_by(username=form.username.data).first()
-        if user is None or not user.check_password(form.password.data):
-            flash('Invalid username or password')
-            return redirect(url_for('login'))
-        login_user(user, remember=form.remember_me.data)
-        next_page = request.args.get('next')
-        if not next_page or url_parse(next_page).netloc != '':
-            next_page = url_for('index')
-        return redirect(next_page)
-    return render_template('login.html', title='Войти', form=form)
-
-
-@app.route('/logout')
-def logout():
-    logout_user()
-    return redirect(url_for('index'))
-
-
-@app.route('/register', methods=['GET', 'POST'])
-def register():
-    form = RegistrationForm()
-    form.department.choices = [(dep.id, dep.name) for dep in Department.query.order_by('name').all()]
-    if form.validate_on_submit():
-        user = User(username=form.username.data, fullname=form.fullname.data,
-                    department=get_dep(form.department.data))
-        user.set_password(form.password.data)
-        db.session.add(user)
-        db.session.commit()
-        flash('Добавлен новый пользователь!')
-        return redirect(url_for('index'))
-    return render_template('register.html', title='Добавить пользователя', form=form)
-
-
-@app.route('/load_from_file', methods=['POST', 'GET'])
+@bp.route('/load_from_file', methods=['POST', 'GET'])
 def load_from_file():
     if request.method == "POST":
         # do something
@@ -167,7 +126,7 @@ def load_from_file():
                 except:
                     return "2 При загрузке из файла произошла ошибка. Строка в файле: " + str(line[0].value)
 
-        return redirect(url_for('index'))
+        return redirect(url_for('main.index'))
     else:
         return render_template("load_from_file.html", wrong_path=False)
 

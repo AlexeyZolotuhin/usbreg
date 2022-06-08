@@ -36,9 +36,9 @@
 
             <div class="text-end">
               {% if current_user.is_anonymous %}
-                <a class="btn btn-outline-light me-2" href="{{ url_for('login') }}">Login</a>
+                <a class="btn btn-outline-light me-2" href="{{ url_for('auth.login') }}">Login</a>
               {% else %}
-                <a class="btn btn-warning" href="{{ url_for('logout') }}">Выход {{ current_user.username }}</a>
+                <a class="btn btn-warning" href="{{ url_for('auth.logout') }}">Выход {{ current_user.username }}</a>
               {% endif %}
             </div>
           </div>
@@ -53,10 +53,10 @@
                         <span class="fs-5">USB-устройства</span>
                         <hr>
                               <ul class="nav nav-pills flex-column mb-auto">
-                                <li><a href="{{ url_for('index') }}" class="link-dark">Список устройств</a></li>
+                                <li><a href="{{ url_for('main.index') }}" class="link-dark">Список устройств</a></li>
                                 <li><a href="#" class="link-dark">Добавить USB</a></li>
                                 <li><a href="#" class="link-dark">Выгрузка в файл</a></li>
-                                <li><a href="{{ url_for('load_from_file') }}" class="link-dark">Загрузка из файла</a></li>
+                                <li><a href="{{ url_for('main.load_from_file') }}" class="link-dark">Загрузка из файла</a></li>
                               </ul>
                         <hr>
                         <span class="fs-5">Компьютеры</span>
@@ -80,7 +80,7 @@
 
                         <ul class="list-inline ps-1">
                           <li>
-                            <a href="{{ url_for('register') }}" class="btn btn-toggle d-inline-flex align-items-center rounded border-0">
+                            <a href="{{ url_for('auth.register') }}" class="btn btn-toggle d-inline-flex align-items-center rounded border-0">
                               Add user
                             </a>
                           </li>
