@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from flask import render_template, make_response, redirect, url_for, request
+from flask import render_template, request
 from app.main import bp
 
 

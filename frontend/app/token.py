@@ -1,5 +1,5 @@
 from flask import request, make_response, url_for
-from flask import flash, render_template
+from flask import flash
 from requests.structures import CaseInsensitiveDict
 
 
