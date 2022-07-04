@@ -1,0 +1,79 @@
+{% extends 'base.html' %}
+
+{% block body %}
+<div class="container">
+    <div class="hstack">
+        <div class="col-lg-9 mt-3" style="overflow: scroll; overflow:  hidden;">
+            <p>Количество записей: {{ devices|length }}</p>
+
+            {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+            <ul>
+                {% for category, message in messages %}
+                    {% if 'dev' in category%}
+                    <li>{{ message }}</li>
+                    {% endif %}
+                {% endfor %}
+            </ul>
+            {% endif %}
+            {% endwith %}
+
+            {% if devices|length > 0 %}
+                {% for el in devices %}
+                    {% if el['status'] == "Активная" %}
+                        <div class="alert alert-info" style="width: 100%;">
+                    {% elif el['status'] == "Вышла из строя" %}
+                        <div class="alert alert-danger">
+                    {% elif el['status'] == "Сдана" %}
+                        <div class="alert alert-warning">
+                    {% endif %}
+                        <h4>Имя устройства: {{ el['dev_numb'] }}</h4>
+                        <p>
+                            Подразделение: {{ el['department_name'] }}<br>
+                            Ответственный: {{ el['owner'] }}<br>
+                            Идентификатор устройства: {{ el['dev_id'] }}<br>
+                            Номер служебной записки: {{ el['doc_numb'] }}<br>
+                            Статус: {{ el['status'] }}<br>
+                        </p>
+                            <p>Дата записи: {{ moment(el['rec_date']).format('LLL') }}</p>
+                            <a href="/devices/detail/{{ el['url_dev_id'] }}" class="btn btn-warning">Детальнее</a>
+                            <a href="/devices/edit_dev/{{ el['id'] }}" class="btn btn-success">Изменить</a>
+                         </div>
+                {% endfor %}
+            {% else %}
+                <p>Нет совпадений для указанных параметров, либо база пуста</p>
+            {% endif %}
+        </div>
+        <div class="col-lg-3 m-3">
+            <div class="p-3 text-dark bg-light sticky-top" style="width: 280px;">
+                    <form method="post" action="">
+                        {{ form.hidden_tag() }}
+                        <span class="fs-4">Фильтровать</span>
+                          <div class="m-2">
+                            {{ form.dev_numb(class="form-control", placeholder='По имени устройства') }}<br>
+                            {{ form.department_id(class="form-select") }}<br>
+                            {{ form.dev_id(class="form-control", placeholder='По идентификатору') }}<br>
+                            {{ form.doc_numb(class="form-control", placeholder='По с.з.') }}<br>
+                            {{ form.status(class="form-select") }}<br>
+                            {{ form.owner(class="form-control", placeholder='По ответственному') }}<br>
+                          </div>
+                        <hr>
+                        <span class="fs-4">Сортировать</span> <br>
+                            <div class="m-2">
+                                {{ form.sortradio() }}
+                            </div>
+                        <hr>
+                        <div class="hstack m-2">
+                            <div class="col-lg-6 ">
+                                {{ form.submit_apply(class="btn btn-success") }}
+                            </div>
+                            <div class="col-lg-6">
+                                {{ form.submit_clear(class="btn btn-warning") }}
+                            </div>
+                        </div>
+                    </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

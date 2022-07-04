@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+
+{% block pagename %}
+{{ title }}
+{% endblock %}
+
+{% block body %}
+<div class="container">
+    <p>Количество записей: {{ users|length }}</p>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+    <ul class=flashes>
+        {% for category, message in messages %}
+        {% if 'user' in category %}
+            <li>{{ message }}</li>
+        {% endif %}
+        {% endfor %}
+    </ul>
+    {% endif %}
+    {% endwith %}
+
+
+    {% if users|length > 0 %}
+    {% for user in users %}
+    <div class="alert alert-info ">
+        <h4>Имя пользователя: {{ user['username'] }}</h4>
+        <p>
+            Подразделение: {{ user['department_name'] }}<br>
+            Полное имя: {{ user['fullname'] }}<br>
+        </p>
+        <a href="{{ url_for('auth.delete_user', id=user['id']) }}" class="btn btn-danger">Удалить</a>
+        <a href="{{ url_for('auth.edit_user', id=user['id']) }}" class="btn btn-warning">Изменить</a>
+    </div>
+    {% endfor %}
+    {% else %}
+    <p>В базе нет пользователей</p>
+    {% endif %}
+</div>
+{% endblock %}
