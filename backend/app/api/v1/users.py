@@ -1,25 +1,24 @@
 from app.api.v1 import bp
-from flask import request, jsonify, g
+from flask import request
 import json
 from app.models import User, Department
 from app import db
 from app.api.v1.errors import bad_request
-from flask_login import login_user
 from app.api.v1.auth import token_auth
 
 
-@bp.route('/users/login/', methods=["POST"])
-def handle_login_request():
-    data = request.get_json() or {}
-    # Check data
-    if 'username' not in data or 'password' not in data or 'remember_me' not in data:
-        return bad_request('Must include username and password fields')
-    # Get and check user and password here
-    user = User.query.filter_by(username=data['username']).first()
-    if user is None or not user.check_password(data['password']):
-        return bad_request('Wrong username or password')
-    login_user(user, remember=data['remember_me'])
-    return json.dumps(user.to_dict(), ensure_ascii=False).encode('utf8')
+# @bp.route('/users/login/', methods=["POST"])
+# def handle_login_request():
+#     data = request.get_json() or {}
+#     # Check data
+#     if 'username' not in data or 'password' not in data or 'remember_me' not in data:
+#         return bad_request('Must include username and password fields')
+#     # Get and check user and password here
+#     user = User.query.filter_by(username=data['username']).first()
+#     if user is None or not user.check_password(data['password']):
+#         return bad_request('Wrong username or password')
+#     login_user(user, remember=data['remember_me'])
+#     return json.dumps(user.to_dict(), ensure_ascii=False).encode('utf8')
 
 
 @bp.route('/users/<int:id>', methods=['GET'])
@@ -44,7 +43,7 @@ def get_users():
 
 
 @bp.route('/users/create', methods=['POST'])
-@token_auth.login_required
+# @token_auth.login_required
 def create_user():
     data = request.get_json(force=True)
     if 'username' not in data or 'fullname' not in data or 'password' not in data or 'department_id' not in data:

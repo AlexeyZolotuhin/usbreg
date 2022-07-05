@@ -47,6 +47,7 @@ def get_device_rec(id):
     return json.dumps(Devinfo.query.get_or_404(id).to_dict(),
                       ensure_ascii=False).encode('utf8')
 
+
 @bp.route('/devices/<int:id>', methods=["PUT"])
 @token_auth.login_required
 def update_rec_dev(id):
@@ -160,44 +161,48 @@ def load_from_file():
     filename = request.get_json(force=True)
     data = get_devices_from_file(filename['filename'])
     report = []
-    for i, dev in enumerate(data):
-        if dev['status'] == 'Активная' and dev['last_state'] is True:
-            if Devinfo.query.filter_by(dev_numb=dev['dev_numb'], status='Активная', last_state=True).first() and \
-            'na' not in dev['dev_numb']:
-                 report.append({'N': i, 'dev_numb': dev['dev_numb'], 'result': 'Ошибка',
-                                'message': 'активное устройство с таким именем уже существует'})
-                 continue
+    if data is None:
+        report.append({'N': 0, 'dev_numb': 'none', 'result': 'Ошибка',
+                       'message': 'Возникла ошибка во время парсинга файла. Проверте правильность заполнения файла'})
+    else:
+        for i, dev in enumerate(data):
+            if dev['status'] == 'Активная' and dev['last_state'] is True:
+                if Devinfo.query.filter_by(dev_numb=dev['dev_numb'], status='Активная', last_state=True).first() and \
+                'na' not in dev['dev_numb']:
+                     report.append({'N': i, 'dev_numb': dev['dev_numb'], 'result': 'Ошибка',
+                                    'message': 'активное устройство с таким именем уже существует'})
+                     continue
 
-            if Devinfo.query.filter_by(dev_id=dev['dev_id'], status='Активная', last_state=True).first():
+                if Devinfo.query.filter_by(dev_id=dev['dev_id'], status='Активная', last_state=True).first():
+                    report.append({'N': i, 'dev_numb': dev['dev_numb'], 'result': 'Ошибка',
+                                   'message': 'активное устройство с указанным идентификатором уже существует'})
+                    continue
+            try:
+                if dev['rec_date'] is not None:
+                    format_date = '%d-%m-%y'
+                    dev['rec_date'] = datetime.datetime.strptime(dev['rec_date'], format_date)
+            except:
                 report.append({'N': i, 'dev_numb': dev['dev_numb'], 'result': 'Ошибка',
-                               'message': 'активное устройство с указанным идентификатором уже существует'})
+                               'message': 'ошибка формата даты'})
                 continue
-        try:
-            if dev['rec_date'] is not None:
-                format_date = '%d-%m-%y'
-                dev['rec_date'] = datetime.datetime.strptime(dev['rec_date'], format_date)
-        except:
-            report.append({'N': i, 'dev_numb': dev['dev_numb'], 'result': 'Ошибка',
-                           'message': 'ошибка формата даты'})
-            continue
 
-        try:
-            dev['department_id'] = Department.query.filter_by(name=dev['department_name']).first().id
-        except:
-            report.append({'N': i, 'dev_numb': dev['dev_numb'], 'result': 'Ошибка',
-                           'message': f'указанного подразделения в БД не найдено: {dev["department_name"]}'})
-            continue
+            try:
+                dev['department_id'] = Department.query.filter_by(name=dev['department_name']).first().id
+            except:
+                report.append({'N': i, 'dev_numb': dev['dev_numb'], 'result': 'Ошибка',
+                               'message': f'указанного подразделения в БД не найдено: {dev["department_name"]}'})
+                continue
 
-        new_dev = Devinfo()
-        try:
-            new_dev.from_dict(dev)
-            db.session.add(new_dev)
-            db.session.commit()
-            report.append({'N': i, 'dev_numb': dev['dev_numb'], 'result': 'Успешно',
-                           'message': 'запись в БД об устройстве добавлена успешно'})
-        except:
-            report.append({'N': i, 'dev_numb': dev['dev_numb'], 'result': 'Ошибка',
-                           'message': 'при добавлении данных в БД произошла ошибка'})
+            new_dev = Devinfo()
+            try:
+                new_dev.from_dict(dev)
+                db.session.add(new_dev)
+                db.session.commit()
+                report.append({'N': i, 'dev_numb': dev['dev_numb'], 'result': 'Успешно',
+                               'message': 'запись в БД об устройстве добавлена успешно'})
+            except:
+                report.append({'N': i, 'dev_numb': dev['dev_numb'], 'result': 'Ошибка',
+                               'message': 'при добавлении данных в БД произошла ошибка'})
 
     response = json.dumps(report, ensure_ascii=False).encode('utf8')
     return response
@@ -205,52 +210,56 @@ def load_from_file():
 
 def get_devices_from_file(filename):
     data = []
-    # Define variable to load the wookbook
-    wook_book = openpyxl.load_workbook(filename)
-    # Define variable to read the active sheet:
-    worksheet = wook_book.active
-    for line in worksheet.iter_rows(2, worksheet.max_row):
-        department_name = line[1].value
-        dev_id = line[2].value
+    try:
+        # Define variable to load the wookbook
+        wook_book = openpyxl.load_workbook(filename)
+        # Define variable to read the active sheet:
+        worksheet = wook_book.active
+        for line in worksheet.iter_rows(2, worksheet.max_row):
+            department_name = line[1].value
+            dev_id = line[2].value
 
-        list_owner_numb = line[3].value.split("/")
-        owner = list_owner_numb[0]
-        dev_numb = line[1].value.split('_')[1] + '-' + list_owner_numb[1]
+            list_owner_numb = line[3].value.split("/")
+            owner = list_owner_numb[0]
+            dev_numb = line[1].value.split('_')[1] + '-' + list_owner_numb[1]
 
-        doc_numb = line[4].value
+            doc_numb = line[4].value
 
-        if "_от" in line[4].value:
-            rec_date = line[4].value.split("_от")[1].replace("г.", "").replace(".", "-")
-        else:
-            rec_date = None
+            if "_от" in line[4].value:
+                rec_date = line[4].value.split("_от")[1].replace("г.", "").replace(".", "-")
+            else:
+                rec_date = None
 
-        remark = ""
-        if line[5].value is not None:
-            remark = line[5].value
+            remark = ""
+            if line[5].value is not None:
+                remark = line[5].value
 
-        if "вышла из строя" in remark or "сдана" in remark:
-            # добавляем неактивную запись флешки и активную с новой датой
-            data.append({'dev_numb': dev_numb, 'dev_id': dev_id, 'department_name': department_name,
-                         'owner': owner, 'doc_numb': doc_numb, 'rec_date': rec_date, 'remark': remark,
-                         'status': 'Активная', 'last_state': False})
+            if "вышла из строя" in remark or "сдана" in remark:
+                # добавляем неактивную запись флешки и активную с новой датой
+                data.append({'dev_numb': dev_numb, 'dev_id': dev_id, 'department_name': department_name,
+                             'owner': owner, 'doc_numb': doc_numb, 'rec_date': rec_date, 'remark': remark,
+                             'status': 'Активная', 'last_state': False})
 
-            remark1 = None
-            if "/" in remark:
-                remark, remark1 = remark.split("/")
+                remark1 = None
+                if "/" in remark:
+                    remark, remark1 = remark.split("/")
 
-            status = ""
-            if "вышла из строя" in remark:
-                status = "Вышла из строя"
-            elif "сдана" in remark:
-                status = "Сдана"
+                status = ""
+                if "вышла из строя" in remark:
+                    status = "Вышла из строя"
+                elif "сдана" in remark:
+                    status = "Сдана"
 
-            rec_date = remark.split("_")[1].replace('.', '-')
-            data.append({'dev_numb': dev_numb, 'dev_id': dev_id, 'department_name': department_name,
-                         'owner': owner, 'doc_numb': doc_numb, 'status': status, 'rec_date': rec_date,
-                         'remark': remark if remark1 is None else remark1, 'last_state': True})
-        else:
-            # добавляем только активную запись
-            data.append({'dev_numb': dev_numb, 'dev_id': dev_id, 'department_name': department_name,
-                         'owner': owner, 'doc_numb': doc_numb, 'status': "Активная", 'rec_date': rec_date,
-                         'remark': remark, 'last_state': True})
+                rec_date = remark.split("_")[1].replace('.', '-')
+                data.append({'dev_numb': dev_numb, 'dev_id': dev_id, 'department_name': department_name,
+                             'owner': owner, 'doc_numb': doc_numb, 'status': status, 'rec_date': rec_date,
+                             'remark': remark if remark1 is None else remark1, 'last_state': True})
+            else:
+                # добавляем только активную запись
+                data.append({'dev_numb': dev_numb, 'dev_id': dev_id, 'department_name': department_name,
+                             'owner': owner, 'doc_numb': doc_numb, 'status': "Активная", 'rec_date': rec_date,
+                             'remark': remark, 'last_state': True})
+    except:
+        data = None
+
     return data

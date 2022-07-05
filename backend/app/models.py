@@ -1,11 +1,11 @@
-from app import db, login
+from app import db
 import base64
 from datetime import datetime, timedelta
 import os
 from werkzeug.security import generate_password_hash, check_password_hash
-from flask_login import UserMixin
 
-class User(UserMixin, db.Model):
+
+class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(64), index=True, unique=True)
     fullname = db.Column(db.String(64), index=True)
@@ -41,7 +41,6 @@ class User(UserMixin, db.Model):
         if 'password' in data:
             self.set_password(data['password'])
 
-
     def get_token(self, expires_in=3600):
         now = datetime.utcnow()
         if self.token and self.token_expiration > now + timedelta(seconds=60):
@@ -61,11 +60,6 @@ class User(UserMixin, db.Model):
         if user is None or user.token_expiration < datetime.utcnow():
             return None
         return user
-
-
-@login.user_loader
-def load_user(id):
-    return User.query.get(int(id))
 
 
 class Devinfo(db.Model):

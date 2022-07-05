@@ -1,7 +1,8 @@
 from app.api.v1 import bp
-from app.models import Devinfo, Department
+from app.models import Department
 import json
 from app.api.v1.auth import token_auth
+
 
 @bp.route('/department/all', methods=["GET"])
 @token_auth.login_required

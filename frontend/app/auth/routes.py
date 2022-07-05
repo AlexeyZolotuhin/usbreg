@@ -100,7 +100,7 @@ def register():
 
 # func view for all users list
 # here we can see all users and have href to edit user page and delete user
-@bp.route('/uses')
+@bp.route('/users')
 def get_all_users():
     # again check token in cookie. Yes, we like cookie. Yum Yum Yum
     if request.cookies.get('token'):
@@ -226,10 +226,10 @@ def edit_user(id):
                 # if all is ok we have username in put_user
                 if 'username' in put_user:
                     flash('Данные пользователя были успешно изменены.', 'edit_user')
-        else:
-            # nothing was changed
-            flash('Новых изменений данных пользователя не было получено.', 'edit_user')
-            return redirect(url_for('auth.get_all_users'))
+            else:
+                # nothing was changed
+                flash('Новых изменений данных пользователя не было получено.', 'edit_user')
+                return redirect(url_for('auth.get_all_users'))
 
         return render_template('auth/edit_user.html', title='Редактирование пользователя', form=form,
                                user=user_for_edit)
