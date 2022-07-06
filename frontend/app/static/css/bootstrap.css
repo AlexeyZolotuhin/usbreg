@@ -11317,20 +11317,20 @@ textarea.form-control-lg {
     animation: arrow-8 3s linear infinite -1.5s;
 }
 @keyframes arrow-8 {
-    0% {
+    100% {
         opacity: 0;
-        transform: translate(0, -53px) rotate(-45deg);
+        transform: translate(0, -53px) rotate(135deg);
     }
     10%, 90% {
         opacity: 0;
     }
     50% {
         opacity: 1;
-        transform: translate(0, 0) rotate(-45deg);
+        transform: translate(0, 0) rotate(135deg);
     }
-    100% {
+    0% {
         opacity: 0;
-        transform: translate(0, 53px) rotate(-45deg);
+        transform: translate(0, 53px) rotate(135deg);
     }
 }
 

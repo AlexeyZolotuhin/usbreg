@@ -13,6 +13,8 @@ from werkzeug.utils import secure_filename
 
 
 # func view for showing all devices
+@bp.route('/', methods=['GET', 'POST'])
+@bp.route('/index', methods=['GET', 'POST'])
 @bp.route('/devices_all', methods=['GET', 'POST'])
 def devices_all():
     # check token in cookie
@@ -358,6 +360,6 @@ def url_to_dev_id(url_dev_id):
 
 
 def allowed_file(filename):
-    """ Функция проверки расширения файла """
+    # check file extension
     return '.' in filename and \
            filename.rsplit('.', 1)[1].lower() in app.config['ALLOWED_EXTENSIONS']

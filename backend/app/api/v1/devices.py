@@ -71,7 +71,7 @@ def update_rec_dev(id):
 @token_auth.login_required
 def get_device_detail():
     data = request.get_json(force=True) or {}
-    detail_dev = Devinfo.query.filter_by(dev_id=data['dev_id']).order_by(Devinfo.rec_date).all()
+    detail_dev = Devinfo.query.filter_by(dev_id=data['dev_id']).order_by(Devinfo.rec_date.desc()).all()
     detail_dev = [dev.to_dict() for dev in detail_dev]
 
     if 'dev_id' in data:
