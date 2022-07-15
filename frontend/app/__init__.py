@@ -20,4 +20,7 @@ def create_app(config_class=Config):
     from app.devices import bp as devices_bp
     app.register_blueprint(devices_bp)
 
+    from app.errors import bp as errors_bp
+    app.register_blueprint(errors_bp)
+
     return app
