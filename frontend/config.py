@@ -1,7 +1,7 @@
 import os
 
 class Config(object):
-    SECRET_KEY = os.environ.get('SECRET_KEY') or 'you-will-never-guess'
-    BACKEND_ADDRESS = "http://127.0.0.1:4000"
-    UPLOAD_FOLDER = 'D:\\usbreg\\load_tmp_files'
+    SECRET_KEY = os.environ.get('SECRET_KEY')
+    BACKEND_ADDRESS = os.environ.get('BACKEND_ADDRESS')
+    UPLOAD_FOLDER = os.environ.get('UPLOAD_FOLDER')
     ALLOWED_EXTENSIONS = {'xlsx', 'xls'}

@@ -53,7 +53,6 @@ class User(db.Model):
     def revoke_token(self):
         self.token_expiration = datetime.utcnow() - timedelta(seconds=1)
 
-
     @staticmethod
     def check_token(token):
         user = User.query.filter_by(token=token).first()
@@ -63,20 +62,19 @@ class User(db.Model):
 
 
 class Devinfo(db.Model):
-
-    id             = db.Column(db.Integer, primary_key=True)
-    dev_numb       = db.Column(db.String(20), nullable=False, index=True)
-    dev_id         = db.Column(db.String(150), nullable=False)
-    dev_type       = db.Column(db.String(30), default="USBflash")
-    department_id  = db.Column(db.Integer, db.ForeignKey('department.id'), index=True)
-    owner          = db.Column(db.String(255), nullable=False)
-    doc_numb       = db.Column(db.String(200))
-    doc_ref        = db.Column(db.String(255))
-    status         = db.Column(db.String(25), default="Активная", index=True)
-    rec_date       = db.Column(db.DateTime, default=datetime.utcnow, index=True)
-    remark         = db.Column(db.Text)
-    last_state     = db.Column(db.Boolean, default=True)
-    user_id        = db.Column(db.Integer, db.ForeignKey('user.id'))
+    id = db.Column(db.Integer, primary_key=True)
+    dev_numb = db.Column(db.String(20), nullable=False, index=True)
+    dev_id = db.Column(db.String(150), nullable=False)
+    dev_type = db.Column(db.String(30), default="USBflash")
+    department_id = db.Column(db.Integer, db.ForeignKey('department.id'), index=True)
+    owner = db.Column(db.String(255), nullable=False)
+    doc_numb = db.Column(db.String(200))
+    doc_ref = db.Column(db.String(255))
+    status = db.Column(db.String(25), default="Активная", index=True)
+    rec_date = db.Column(db.DateTime, default=datetime.utcnow, index=True)
+    remark = db.Column(db.Text)
+    last_state = db.Column(db.Boolean, default=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
 
     def __repr__(self):
         return "<Device {}>".format(self.dev_numb)
@@ -109,27 +107,25 @@ class Devinfo(db.Model):
 
 
 class Department(db.Model):
-
-    id                = db.Column(db.Integer, primary_key=True)
-    name              = db.Column(db.String(15), nullable=False, unique=True, index=True)
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(15), nullable=False, unique=True, index=True)
     doc_administrator = db.Column(db.String(255))
-    devices           = db.relationship('Devinfo', backref='department')
-    users             = db.relationship('User', backref='department')
-    permit_computers  = db.relationship('Permit_computer', backref='department')
+    devices = db.relationship('Devinfo', backref='department')
+    users = db.relationship('User', backref='department')
+    permit_computers = db.relationship('Permit_computer', backref='department')
 
     def __repr__(self):
         return "<Department {}>".format(self.name)
 
 
 class Permit_computer(db.Model):
-
-    id            = db.Column(db.Integer, primary_key=True)
-    comp_name     = db.Column(db.String(15), nullable=False, index=True)
-    status        = db.Column(db.String(25), default="Разрешен", index=True)
-    last_state    = db.Column(db.Boolean, default=True)
+    id = db.Column(db.Integer, primary_key=True)
+    comp_name = db.Column(db.String(15), nullable=False, index=True)
+    status = db.Column(db.String(25), default="Разрешен", index=True)
+    last_state = db.Column(db.Boolean, default=True)
     department_id = db.Column(db.Integer, db.ForeignKey('department.id'))
-    rec_date      = db.Column(db.DateTime, default=datetime.utcnow, index=True)
-    remark        = db.Column(db.Text)
+    rec_date = db.Column(db.DateTime, default=datetime.utcnow, index=True)
+    remark = db.Column(db.Text)
 
     def __repr__(self):
         return "<Computer {}>".format(self.comp_name)

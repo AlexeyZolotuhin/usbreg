@@ -187,8 +187,14 @@ def load_from_file():
                 continue
 
             try:
+                print(dev['department_name'])
                 dev['department_id'] = Department.query.filter_by(name=dev['department_name']).first().id
             except:
+
+                d = Department(name=dev['department_name'])
+                db.session.add(d)
+                db.session.commit()
+                dev['department_id'] = Department.query.filter_by(name=dev['department_name']).first().id
                 report.append({'N': i, 'dev_numb': dev['dev_numb'], 'result': 'Ошибка',
                                'message': f'указанного подразделения в БД не найдено: {dev["department_name"]}'})
                 continue
