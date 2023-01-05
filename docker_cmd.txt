@@ -1,0 +1,5 @@
+docker network create --driver bridge --subnet 192.168.100.0/24 --ip-range 192.168.100.0/24 usb-bridge
+docker run -p 3306:3306 --name usb-mysql -v /home/alzo/mysql:/var/lib/mysql  --network usb-bridge -e MYSQL_ROOT_PASSWORD=1111Aa -d mysql         
+docker run -p 4000:4000 --name backend --network usb-bridge -v /mnt/e/usbreg/tmp_upload:/tmp_upload -d flask_backend
+docker run -p 8080:3000 --name frontend --network usb-bridge -v /mnt/e/usbreg/tmp_upload:/tmp_upload -d flask_frontend
+
