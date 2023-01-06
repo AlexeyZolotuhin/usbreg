@@ -7,7 +7,7 @@ services:
     volumes:
       - /home/alzo/mysql:/var/lib/mysql
     environment:
-      MYSQL_ROOT_PASSWORD: 1111Aa
+      MYSQL_ROOT_PASSWORD: 
     networks:
       - usb-bridge
     ports:
@@ -18,8 +18,8 @@ services:
     environment:
       FLASK_APP: backend.py
       UPLOAD_FOLDER: /tmp_upload
-      SECRET_KEY: you-will-never-guess
-      DATABASE_URL: mysql+pymysql://root:1111Aa@usb-mysql/usbstrela
+      SECRET_KEY: 
+      DATABASE_URL: 
     volumes:
       - /mnt/e/usbreg/tmp_upload:/tmp_upload
     ports:
@@ -34,7 +34,7 @@ services:
     environment:
       FLASK_APP: frontend.py
       UPLOAD_FOLDER: /tmp_upload
-      SECRET_KEY: you-will-never-guess
+      SECRET_KEY: 
       BACKEND_ADDRESS: http://backend:4000
     volumes:
       - /mnt/e/usbreg/tmp_upload:/tmp_upload
