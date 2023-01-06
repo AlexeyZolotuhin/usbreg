@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 import json
-from frontend import app
 from flask import render_template, redirect, url_for, request, flash
 from app.devices.forms import FilterForm, EditForm, AddForm
 from app import Config
@@ -328,8 +327,11 @@ def load_from_file():
                 return redirect(url_for('devices.load_from_file'))
             if file and allowed_file(file.filename):
                 filename = secure_filename(file.filename)
-                full_filename = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-                file.save(full_filename)
+                full_filename = os.path.join(Config.UPLOAD_FOLDER, filename)
+                try:
+                    file.save(full_filename)
+                except:
+                    print("wrong during save")
                 report = requests.post(f'{Config.BACKEND_ADDRESS}/api/v1/devices/load_from_file',
                                        data=json.dumps({'filename': full_filename}, ensure_ascii=False).encode('utf8'),
                                        headers=make_token_headers()).json()
@@ -362,4 +364,4 @@ def url_to_dev_id(url_dev_id):
 def allowed_file(filename):
     # check file extension
     return '.' in filename and \
-           filename.rsplit('.', 1)[1].lower() in app.config['ALLOWED_EXTENSIONS']
+           filename.rsplit('.', 1)[1].lower() in Config.ALLOWED_EXTENSIONS

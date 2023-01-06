@@ -1,0 +1,55 @@
+version: "3.7"
+
+
+services:
+  usb-mysql:
+    image: mysql:latest
+    volumes:
+      - /home/alzo/mysql:/var/lib/mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: 1111Aa
+    networks:
+      - usb-bridge
+    ports:
+      - 3306:3306
+
+  backend:
+    build: backend/
+    environment:
+      FLASK_APP: backend.py
+      UPLOAD_FOLDER: /tmp_upload
+      SECRET_KEY: you-will-never-guess
+      DATABASE_URL: mysql+pymysql://root:1111Aa@usb-mysql/usbstrela
+    volumes:
+      - /mnt/e/usbreg/tmp_upload:/tmp_upload
+    ports:
+      - 4000:4000
+    depends_on:
+      - usb-mysql
+    networks:
+      - usb-bridge
+
+  frontend:
+    build: frontend/
+    environment:
+      FLASK_APP: frontend.py
+      UPLOAD_FOLDER: /tmp_upload
+      SECRET_KEY: you-will-never-guess
+      BACKEND_ADDRESS: http://backend:4000
+    volumes:
+      - /mnt/e/usbreg/tmp_upload:/tmp_upload
+    ports:
+      - 8080:3000
+    depends_on:
+      - backend
+    networks:
+      - usb-bridge
+
+networks:
+  usb-bridge:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 192.168.100.0/24
+
+

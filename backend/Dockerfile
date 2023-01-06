@@ -1,10 +1,17 @@
-FROM python:3.9
-WORKDIR /app_backend
-ENV FLASK_APP backend.py
-ENV UPLOAD_FOLDER /tmp_upload
-ENV SECRET_KEY you-will-never-guess
-ENV DATABASE_URL mysql+pymysql://root:1111Aa@usb-mysql/usbstrela
+FROM python:3.9-alpine
+
+RUN adduser -D backend
+WORKDIR /home/backend/
+
 COPY requirements.txt .
 RUN pip install -r requirements.txt
-COPY . .
-CMD ["python3",  "backend.py"]
+RUN pip install gunicorn
+
+COPY app app
+COPY backend.py config.py start_back.sh ./
+COPY migrations migrations
+
+USER backend
+
+EXPOSE 4000
+ENTRYPOINT ["./start_back.sh"]
