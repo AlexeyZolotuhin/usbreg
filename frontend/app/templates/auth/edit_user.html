@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+
+{% block body %}
+<div class="container mt-3">
+    <form action="" method="post" class="form-control">
+        {{ form.hidden_tag() }}
+        <p>
+            {{ form.username.label }}<br>
+            {{ form.username(size=32, class="form-control", value=user['username'])}}<br>
+            {% for error in form.username.errors %}
+            <span style="color: red;">[{{ error }}]</span>
+            {% endfor %}
+        </p>
+        <p>
+            {{ form.fullname.label }}<br>
+            {{ form.fullname(size=64, class="form-control", value=user['fullname'])}}<br>
+            {% for error in form.fullname.errors %}
+            <span style="color: red;">[{{ error }}]</span>
+            {% endfor %}
+        </p>
+        <p>
+            {{ form.department.label }}<br>
+            {% set z = form.department.process_data(user['department_id']) %}
+            {{ form.department(class="form-select") }}<br>
+            {% for error in form.department.errors %}
+            <span style="color: red;">[{{ error }}]</span>
+            {% endfor %}
+        </p>
+        <p>
+            {{ form.password.label }}<br>
+            {{ form.password(size=32, class="form-control") }}<br>
+            {% for error in form.password.errors %}
+            <span>{{ error }}</span>
+            {% endfor %}
+        </p>
+        <p>
+            {{ form.password2.label }}<br>
+            {{ form.password2(size=32, class="form-control") }}<br>
+            {% for error in form.password2.errors %}
+            <span>{{ error }}</span>
+            {% endfor %}
+        </p>
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+        <ul class=flashes>
+            {% for category, message in messages %}
+            {% if category == 'edit_user' %}
+                <li>{{ message }}</li>
+            {% endif %}
+            {% endfor %}
+        </ul>
+        {% endif %}
+        {% endwith %}
+
+        <p>{{ form.submit(class="btn btn-success") }}</p>
+    </form>
+</div>
+{% endblock %}

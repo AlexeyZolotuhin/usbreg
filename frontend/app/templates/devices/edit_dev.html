@@ -1,0 +1,85 @@
+{% extends 'base.html' %}
+
+{% block pagename %}
+    Детальная информация об устройстве: <br>
+    {{ title }}
+{% endblock %}
+
+{% block body %}
+<div class="container mt-3">
+    <form action="" method="post" class="form-control">
+        {{ form.hidden_tag() }}
+        <p>
+            {{ form.dev_numb.label }}<br>
+            {{ form.dev_numb(size=32, class="form-control")}}<br>
+            {% for error in form.dev_numb.errors %}
+            <span>[{{ error }}]</span>
+            {% endfor %}
+        </p>
+        <!--
+        <p>
+            {{ form.dev_id.label }}<br>
+            {{ form.dev_id(size=64, class="form-control", value=rec_dev['dev_id'])}}<br>
+            {% for error in form.dev_id.errors %}
+            <span>[{{ error }}]</span>
+            {% endfor %}
+        </p>
+        -->
+        <p>
+            {{ form.dev_type.label }}<br>
+            {{ form.dev_type(class="form-select") }}<br>
+            {% for error in form.dev_type.errors %}
+            <span>[{{ error }}]</span>
+            {% endfor %}
+        </p>
+        <p>
+            {{ form.department_id.label }}<br>
+            {{ form.department_id(class="form-select") }}<br>
+            {% for error in form.department_id.errors %}
+            <span>[{{ error }}]</span>
+            {% endfor %}
+        </p>
+        <p>
+            {{ form.owner.label }}<br>
+            {{ form.owner(size=64, class="form-control")}}<br>
+            {% for error in form.owner.errors %}
+            <span>[{{ error }}]</span>
+            {% endfor %}
+        </p>
+        <p>
+            {{ form.doc_numb.label }}<br>
+            {{ form.doc_numb(size=64, class="form-control")}}<br>
+            {% for error in form.doc_numb.errors %}
+            <span>[{{ error }}]</span>
+            {% endfor %}
+        </p>
+        <p>
+            {{ form.status.label }}<br>
+            {{ form.status(class="form-select") }}<br>
+            {% for error in form.status.errors %}
+            <span>[{{ error }}]</span>
+            {% endfor %}
+        </p>
+        <p>
+            {{ form.remark.label }}<br>
+            {{ form.remark(size=64, class="form-control")}}<br>
+            {% for error in form.remark.errors %}
+            <span>[{{ error }}]</span>
+            {% endfor %}
+        </p>
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+        <ul class=flashes>
+            {% for category, message in messages %}
+            {% if category == 'new_rec_dev' %}
+                <li>{{ message }}</li>
+            {% endif %}
+            {% endfor %}
+        </ul>
+        {% endif %}
+        {% endwith %}
+
+        <p>{{ form.submit(class="btn btn-success") }}</p>
+    </form>
+</div>
+{% endblock %}

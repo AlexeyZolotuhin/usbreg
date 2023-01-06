@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+
+{% block body %}
+<div class="container mt-5">
+
+    <p><a href="{{url_for('devices.device_delete_all', url_dev_id=dev_detail[0]['url_dev_id']) }}" class="btn btn-danger">Удалить все данные об устройстве</a></p>
+    <hr>
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+    <ul>
+        {% for category, message in messages %}
+        {% if 'dev' in category %}
+        <li>{{ message }}</li>
+        {% endif %}
+        {% endfor %}
+    </ul>
+    <hr>
+    {% endif %}
+    {% endwith %}
+
+        {% for el in dev_detail %}
+            {% if el['status'] == "Активная" %}
+                <div class="alert alert-info ">
+            {% elif el['status'] == "Вышла из строя" %}
+                <div class="alert alert-danger">
+            {% elif el['status'] == "Сдана" %}
+                <div class="alert alert-warning">
+            {% endif %}
+            <h4>Имя устройсва: {{  el['dev_numb'] }}</h4>
+            <p>
+            Подразделение: {{ el['department_name'] }}<br>
+            Ответственный: {{ el['owner'] }}<br>
+            Тип устройства: {{ el['dev_type'] }}<br>
+            Номер служебной записки: {{ el['doc_numb'] }}<br>
+            Статус: {{ el['status'] }}<br>
+            Примечание: {{ el['remark'] }}<br>
+            </p>
+            <p>Дата записи: {{ moment(el['rec_date']).format('LLL') }}</p>
+            {% if dev_detail|length > 1 %}
+                <a href="{{ url_for('devices.device_delete_rec',
+                            id=el['id'], url_dev_id=el['url_dev_id']) }}" class="btn btn-danger">Удалить запись</a>
+            {% endif %}
+                <a href="{{ url_for('devices.device_correct_rec',
+                            id=el['id']) }}" class="btn btn-success">Корректировать запись</a>
+        </div>
+            {% if dev_detail.index(el) < dev_detail|length-1 %}
+                <div class="arrow-8"></div>
+            {% endif %}
+        {% endfor %}
+
+</div>
+{% endblock %}

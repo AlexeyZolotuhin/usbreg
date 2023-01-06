@@ -1,0 +1,9 @@
+{% extends 'base.html' %}
+
+{% block pagename %}
+    {{ title }}
+{% endblock %}
+
+{% block body %}
+    <h1> Добро пожаловать {% if username != None %}, {{ username }} {% endif %}!</h1>
+{% endblock %}
